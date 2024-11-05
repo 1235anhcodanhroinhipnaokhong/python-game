@@ -19,6 +19,7 @@ class OnlinePlayer(Player):
         self.rect.center = self.hitbox.center
         if self.selected_weapon:
             self.selected_weapon.rotate(-self.angle)
+        self.leg.rotate(-self.angle)
     
     def load_data(self, data):
         if self.team != data['team']:
@@ -28,6 +29,7 @@ class OnlinePlayer(Player):
         self.hp = data['hp']
         self.angle = data['angle']
         self.leg.curr_sp_index = data['leg_index']
+        self.leg.change_index(self.leg.curr_sp_index)
         if self.dead != data['dead']:
             if data['dead'] == False:
                 Gun.sprite_groups.add(self.selected_weapon)

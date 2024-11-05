@@ -50,6 +50,7 @@ class GameState:
             'sp_index': 0,
             'leg_index' : 0,
             'knife_sl': [],
+            'leg_index' : 0,
             'nade':[],
             'dead': False,
             'firing': False,

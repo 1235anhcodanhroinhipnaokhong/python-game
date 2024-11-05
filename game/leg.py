@@ -39,6 +39,9 @@ class Leg(pygame.sprite.Sprite):
             # if self.curr_sp_index % 2 == 0:
             self.org_image = self.img_list[self.curr_sp_index]
     
+    def change_index(self, index):
+        self.org_image = self.img_list[self.curr_sp_index]
+    
     def rotate(self, angle):
         self.angle = -angle
         self.offset_x = math.cos(self.angle * (2 * math.pi / 360)) * self.pos_buffer
