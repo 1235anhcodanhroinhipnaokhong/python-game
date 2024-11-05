@@ -18,7 +18,7 @@ class GameState:
         self.nades = []
         self.message = []
         self.players_stat = {}
-        self.round_time = 30
+        self.round_time = 600
         self.end_time = time.time() + self.round_time
         self.on_reset = False
         
@@ -48,6 +48,7 @@ class GameState:
             'bullets' : [],
             'wp_index': 1,
             'sp_index': 0,
+            'leg_index' : 0,
             'knife_sl': [],
             'nade':[],
             'dead': False,
