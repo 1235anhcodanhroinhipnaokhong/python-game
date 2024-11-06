@@ -37,7 +37,7 @@ class StartMenu:
     def init_join_buttons(self, server_list):
         y_start = 150
         for index, server in enumerate(server_list):
-            button_rect = pygame.Rect(370, y_start + index * 100, 285, 40)
+            button_rect = pygame.Rect(370, y_start + index * 50, 285, 40)
             self.join_buttons.append((server[0], button_rect,server[1] ,server[2]))
             
     def draw(self):
