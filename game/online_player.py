@@ -1,11 +1,10 @@
 import pygame
-import random, math
 from game.player import Player
 from game.settings import *
 from game.ultis.resource_loader import get_sprite_from_sheet
 from game.weapon import Gun
 from game.leg import Leg
-
+from game.leg import Leg
 
 class OnlinePlayer(Player):
     
@@ -34,6 +33,7 @@ class OnlinePlayer(Player):
         if self.dead != data['dead']:
             if data['dead'] == False:
                 Gun.sprite_groups.add(self.selected_weapon)
+                Leg.sprite_group.add(self.leg)
                 Leg.sprite_group.add(self.leg)
             else:
                 Gun.sprite_groups.remove(self.selected_weapon)

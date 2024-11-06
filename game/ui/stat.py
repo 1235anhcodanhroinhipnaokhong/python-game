@@ -26,29 +26,39 @@ class StatsMenu:
     def hide(self):
         self.hidden = True
 
-    def draw(self, surface, pos):
+    def display(self, surface, pos):
         if self.hidden:
             return
         self.surface.fill(self.BACKGROUND_COLOR)
         headers = ["Player", "Kills", "Deaths", "Assists", "KDR", "Score"]
         for i, header in enumerate(headers):
             text_surface = self.FONT.render(header, True, (255, 255, 255))
-            self.surface.blit(text_surface, (100 + i * 100, 20))
+            if i == 0:
+                self.surface.blit(text_surface, (100, 20))
+            else:
+                self.surface.blit(text_surface, (180 + i * 100, 20))
 
         players = list(self.players_stat.values())
+        players.sort(key= lambda p : -p['sc'])
         for i, player in enumerate(players):
             y_offset = 60 + i * 40
             row_color = self.ROW_COLOR_1 if i % 2 == 0 else self.ROW_COLOR_2
             row_background = pygame.Surface((600, 40))
             row_background.fill(row_color)
             self.surface.blit(row_background, (100, y_offset))
+            shorten_name = player["id"]
+            if shorten_name.__len__() >= 15:
+                shorten_name = shorten_name[:15] + ".."
             stats = [
-                player["id"], str(player["k"]), str(player["d"]),
+                shorten_name, str(player["k"]), str(player["d"]),
                 str(player["a"]), str(player["KDR"]), str(player["sc"])
             ]
             
             for j, stat in enumerate(stats):
                 text_surface = self.FONT.render(stat, True, (255, 255, 255))
-                self.surface.blit(text_surface, (100 + j * 100, y_offset))
+                if j == 0:
+                    self.surface.blit(text_surface, (100, y_offset))
+                else:
+                    self.surface.blit(text_surface, (180 + j * 100, y_offset))
 
         surface.blit(self.surface, pos)

@@ -1,7 +1,7 @@
 import pygame
 import time
 
-class UI:
+class IngameUI:
     def __init__(self):
         # General
         self.display_surface = pygame.display.get_surface()

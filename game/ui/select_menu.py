@@ -1,25 +1,8 @@
 import pygame
 import random
 
-class Menu:
-	# def draw(self, surface):
-	# 	action = False
-	# 	#get mouse position
-	# 	pos = pygame.mouse.get_pos()
+class SelectMenu:
 
-	# 	#check mouseover and clicked conditions
-	# 	if self.rect.collidepoint(pos):
-	# 		if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
-	# 			self.clicked = True
-	# 			action = True
-
-	# 	if pygame.mouse.get_pressed()[0] == 0:
-	# 		self.clicked = False
-
-	# 	#draw button on screen
-	# 	surface.blit(self.image, (self.rect.x, self.rect.y))
-
-	# 	return action
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font('assets/fonts/korean.ttf', 20)  
@@ -84,14 +67,10 @@ class Menu:
         return counter_terrorists_buttons
     def toggle(self):
         self.main_active = not self.main_active
-        # self.sub_menu_active = not self.sub_menu_active
 
     def draw(self):
         if self.main_active:
             self.draw_menu()
-            # if self.sub_menu_active:
-            #     self.toggle()
-            #     self.draw_sub_menu()
 
     def draw_menu(self):        
             s = pygame.Surface((self.display_surface.get_width(), self.display_surface.get_height()))
@@ -119,7 +98,6 @@ class Menu:
     def handle_event(self, event : pygame.event.EventType):
         
         if event.type == pygame.KEYDOWN and event.key == pygame.K_m:  
-            print("fdsfds")
             self.val = ""
             self.toggle()
             self.buttons = self.main_buttons
@@ -128,7 +106,6 @@ class Menu:
             mouse_pos = pygame.mouse.get_pos()
             for name, rect in self.buttons.items():
                 if rect.collidepoint(mouse_pos):
-                    print(f"{name} button clicked")
                     if name == 'Terrorists' :
                         self.buttons = self.terrorists_buttons
                         self.val = "t"

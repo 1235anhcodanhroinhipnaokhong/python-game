@@ -1,14 +1,11 @@
 import pygame, random
-from functools import partial
-from game.bullet import Bullet, LineBullet
-from game.ultis.resource_loader import import_csv_layout, get_tile_texture, get_animation_from_img
+from game.bullet import LineBullet
+from game.ultis.resource_loader import import_csv_layout, get_animation_from_img
 from game.settings import *
 from game.player import Player
 from game.online_player import OnlinePlayer
 from game.tile import Tile
-from game.network import Network
 from game.weapon import Gun, Knife, Weapon
-from game.input_event import InputEvent
 from game.leg import Leg
 from game.ultis.func import distance
 from game.ui.message_bar import MessageBar
@@ -16,7 +13,7 @@ from game.ui.stat import StatsMenu
 from game.ui.msg_popup import MsgPopup
 from game.leg import Leg
 
-from game.ui.ui import UI
+from game.ui.ingame_ui import IngameUI
 class GameClient:
     def __init__(self, id, team, network):
         self.display_surface =  pygame.display.get_surface() 
@@ -37,14 +34,8 @@ class GameClient:
         LineBullet.init_hit_obtacles(self.obstacles_sprites, self.totals_player)
         Weapon.init(self.visible_sprites, self.obstacles_sprites)
         Leg.init(self.visible_sprites)
-        self.create_map(id, team)
+        self.create_player(id, team)
         Gun.init(self.bullets)
-        # self.select_team = None
-        
-        
-        self.pygame_events = None
-        # self.firing_sound = pygame.mixer.Sound('./assets/sounds/ak47.wav')
-        
         
         
         #pointer 
@@ -52,24 +43,24 @@ class GameClient:
         self.pointer_rect = self.pointer_image.get_rect()
         
         # UI
-        self.ui = UI()
+        self.ingame_ui = IngameUI()
         
-    def create_map(self, id, team):
+        
+        #map init
         layouts = {
-            'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30)),
-            'spawn' : import_csv_layout('./assets/maps/dust2/dust2.csv', [47, 48])
+            'boundary': import_csv_layout('./assets/maps/dust2/dust2.csv',range(5,30))
         }
         for row_index, row in enumerate(layouts['boundary']):
             for col_index, val in enumerate(row):
                 x = col_index * TILE_SIZE
                 y = row_index * TILE_SIZE
                 if val != -1:
-                    Tile((x, y),[self.visible_sprites, self.obstacles_sprites])                    
-           
+                    Tile((x, y),[self.obstacles_sprites])  
+        
+    def create_player(self, id, team):
         (spawn_x, spawn_y) = self.network.player_init(id, team)
         self.local_player = Player((spawn_x, spawn_y),[self.visible_sprites, self.totals_player], self.obstacles_sprites, team, id)
         self.local_player.sound_channel_init(pygame.mixer.Channel(self.sound_channel_cnt))
-        self.local_player.set_volume(30)
         self.local_player.weapons_init()
         self.sound_channel_cnt += 1
         self.player_id.append(id)
@@ -112,7 +103,6 @@ class GameClient:
             'id' : self.local_player.id,
             'player' : self.local_player.get_data()
         }
-        # print(self.local_player.firing)
         self.network.fetch_data()
         self.local_player.bullets.clear()
         self.local_player.knife_sl.clear()
@@ -120,7 +110,7 @@ class GameClient:
         self.local_player.firing = False
         
         for key in self.network.server_data['player'].keys():
-            if key not in self.player_id and key != 'bullets':
+            if key not in self.player_id:
                 self.player_id.append(key)
                 new_player = OnlinePlayer(self.network.server_data['player'][key]['pos'], [self.visible_sprites, self.totals_player],
                                              self.obstacles_sprites, self.network.server_data['player'][key]['team'] , key)
@@ -149,18 +139,17 @@ class GameClient:
             
                  
                      
-    def run(self, mouse_clicking = False):
+    def run(self):
         self.volume_control()
         self.visible_sprites.update()
         self.network_update()
-        self.visible_sprites.display(self.bullets, self.obstacles_sprites, self.totals_player)    
-        self.ui.display(self.local_player, self.time)
+        self.visible_sprites.display(self.bullets)    
+        self.ingame_ui.display(self.local_player, self.time)
         self.msg_bar.display()
-        self.stats_menu.draw(self.display_surface, (250, 60))
+        self.stats_menu.display(self.display_surface, (250, 60))
         self.win_popup.display()
                 
     def cleanup(self):
-        self.network.shut_down(self.local_player.id)
         self.bullets.clear()
         self.online_player.empty() 
 
@@ -184,7 +173,7 @@ class CameraGroup(pygame.sprite.Group):
     def set_local_player(self, local_player):
         self.local_player = local_player    
         
-    def display(self,bullets, obtacles_sprites, player_groups):
+    def display(self, bullets):
         #* get the offset
         self.offset.x = self.local_player.hitbox.centerx - CENTER_X
         self.offset.y = self.local_player.hitbox.centery - CENTER_Y
@@ -199,8 +188,6 @@ class CameraGroup(pygame.sprite.Group):
                 
         for sprite in self.sprites():
             if sprite.__class__.__name__ == 'Leg':
-                continue
-            if sprite.__class__.__name__ == 'Tile':
                 continue
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)

@@ -1,13 +1,18 @@
 import socket
 import json
 from game.settings import *
+import configparser
 
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  
         self.client.settimeout(20)
-        self.server = "192.168.1.27"
-        self.port = 5555
+        config = configparser.ConfigParser()
+        config.read('config.cfg')
+        HOST = config['main_server']['host']
+        PORT = int(config['main_server']['port'])
+        self.server = HOST
+        self.port = PORT
         self.addr = (self.server, self.port)
         self.local_data = {
             'flag' : 2,

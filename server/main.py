@@ -6,7 +6,8 @@ import time
 from settings import *
 from gamestate import GameState
 
-HOST = '192.168.1.27'
+# HOST = '192.168.1.27'
+HOST = '192.168.1.9'
 PORT = 5555
 
 
@@ -76,6 +77,10 @@ class ProxyServer:
             print("Proxy server closed.")
 
 
+def addr_to_str(addr):
+    host, port = addr
+    return host + ":"+  str(port)
+
 class Server:
     def __init__(self, host, port, max_client):
         self.host = host
@@ -87,13 +92,23 @@ class Server:
         self.state = GameState()
         self.shut_down = False
         self.is_first_created = True
+        self.unique_id = {
+        }
     
     def process_client_data(self, data, addr):
         try:
             client_data = json.loads(data.decode())
-            player_id = client_data.get('id', '')
+            if addr_to_str(addr) in self.unique_id.keys():
+                player_id = self.unique_id[addr_to_str(addr)]
+            
             
             if client_data['flag'] == 1:
+                if client_data['id'] in self.unique_id.values():
+                    self.unique_id[addr_to_str(addr)] = client_data['id'] + "1"
+                else:
+                    self.unique_id[addr_to_str(addr)] = client_data['id']
+                player_id = self.unique_id[addr_to_str(addr)]
+                
                 self.clients[addr] = player_id   
                 self.state.init_player(player_id, client_data['team'])
                 self.state.init_stat(player_id)
@@ -116,10 +131,10 @@ class Server:
                 self.state.change_team(player_id, client_data['team'])
                 
             elif client_data['flag'] == -1:
-                self.state.send_message(f"{client_data['id']} had disconnected")
+                self.state.send_message(f"{player_id} had disconnected")
                 self.state.players.pop(self.clients[addr])
                 self.clients.pop(addr)
-                print(f"{client_data['id']} had disconnected")
+                print(f"{player_id} had disconnected")
                 if self.clients.__len__() == 0 and not self.is_first_created:
                     self.shut_down = True
         
@@ -136,15 +151,15 @@ class Server:
                     print(f"New connection from {addr}")
                 self.process_client_data(data, addr)
                 
+            for server in servers_list:
+                if server[2] == self.port:
+                    servers_list.remove(server)                
         except KeyboardInterrupt:
             print("\nShutting down the server...")
             self.shut_down = True
         except Exception as e:
             print("game server error" ,e)
         finally:
-            for server in servers_list:
-                if server[2] == self.port:
-                    servers_list.remove(server)
             self.socket.close()
             print("Server closed.")
 

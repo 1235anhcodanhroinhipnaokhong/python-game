@@ -203,9 +203,10 @@ class Grenade(Weapon):
         self.hitbox = self.rect.inflate((-25,-25))
         # self.explode_img_sheet = pygame.image.load("./assets/gfx/explosion.png")
         self.explode_img_sheet = pygame.transform.scale(pygame.image.load("./assets/gfx/explosion.png"),(640,640))
-        self.on_explode = False
         self.explode_img_index = 0
         self.data_send = False
+        self.speed_x = 0
+        self.speed_y = 0
     
     def grenade_init(self):
         if self.name == "he":
@@ -213,7 +214,12 @@ class Grenade(Weapon):
          
     def reset(self):
         self.bullets_remain = 3     
-        self.sprite_groups.add(self)
+        if self not in self.sprite_groups:
+            self.sprite_groups.add(self)
+        self.onthrow = False
+        self.throw_hook.finished = False
+        self.throw_hook.time_cnt = 2.2
+        self.explode_img_index = 0
         
     def rotate(self, angle):
         if not self.onthrow:
@@ -224,12 +230,11 @@ class Grenade(Weapon):
         self.onthrow = True
         if self.throw_hook.finished and self.bullets_remain > 0:
             self.bullets_remain -= 1
-            self.offset_x = math.cos(self.angle * (2 * math.pi / 360)) * self.throw_speed
-            self.offset_y = math.sin(self.angle * (2 * math.pi / 360)) * self.throw_speed
+            self.speed_x = math.cos(self.angle * (2 * math.pi / 360)) * self.throw_speed
+            self.speed_y = math.sin(self.angle * (2 * math.pi / 360)) * self.throw_speed
     
     def finish_throw(self):        
         self.onthrow = False
-        self.on_explode = False
         self.explode_img_index = 0
         self.data_send = False
         if self.bullets_remain == 0:
@@ -244,8 +249,8 @@ class Grenade(Weapon):
                 self.sound_channel.play(self.explode_sound)
                             
             if self.throw_hook.time_cnt >= 0.42 * 2.5:
-                self.rect.centerx += self.offset_x
-                self.rect.centery += self.offset_y
+                self.rect.centerx += self.speed_x
+                self.rect.centery += self.speed_y
             else:
                 if not self.data_send:
                     self.data_send = True
@@ -257,19 +262,19 @@ class Grenade(Weapon):
                 if obtacle.rect.colliderect(self.hitbox):
                     dx = self.hitbox.centerx - obtacle.rect.centerx
                     dy = self.hitbox.centery - obtacle.rect.centery
-                    if abs(dx) > abs(dy):  # Horizontal collision
+                    if abs(dx) > abs(dy): 
                         if dx > 0:
-                            if self.offset_x < 0:
-                                self.offset_x = -self.offset_x
+                            if self.speed_x < 0:
+                                self.speed_x = -self.speed_x
                         else:
-                            if self.offset_x > 0:
-                                self.offset_x = -self.offset_x
+                            if self.speed_x > 0:
+                                self.speed_x = -self.speed_x
                     else:  
                         if dy > 0:
-                            if self.offset_y < 0:
-                                self.offset_y = -self.offset_y
+                            if self.speed_y < 0:
+                                self.speed_y = -self.speed_y
                         else:
-                            if self.offset_y > 0:
-                                self.offset_y = -self.offset_y
+                            if self.speed_y > 0:
+                                self.speed_y = -self.speed_y
                     break
         

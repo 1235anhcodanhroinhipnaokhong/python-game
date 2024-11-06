@@ -36,8 +36,7 @@ class GameState:
                 if val == 47:
                     self.t_spawn.append((x,y))
     
-    def init_player(self, player_id, team):
-        print("init player on team ", team)
+    def init_player(self, player_id, team, first = True):
         self.players[player_id] = {
             'team' : team,
             'pos' : self.ct_spawn[random.randint(0,self.ct_spawn.__len__()-2)] 
@@ -125,7 +124,7 @@ class GameState:
                 continue
             hitbox_x, hitbox_y = player_data['pos']
             for (start_pos, end_pos, angle, dmg, id) in self.bullets:
-                if id == player_id:
+                if self.players[id]['team'][:-1] == player_data['team'][:-1]:
                     continue
                 if line_rectangle_collision( (start_pos, end_pos),
                                     (hitbox_x - PLAYER_HITBOX_SIZE / 2, hitbox_y - PLAYER_HITBOX_SIZE / 2, PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE)
@@ -144,7 +143,7 @@ class GameState:
                 continue
             hitbox_x, hitbox_y = player_data['pos']
             for (x,y,w,h, id) in self.knifes:
-                if id == player_id:
+                if self.players[id]['team'][:-1] == player_data['team'][:-1]:
                     continue
                 if rectangle_collision((x,y,w,h), (hitbox_x - PLAYER_HITBOX_SIZE / 2, hitbox_y - PLAYER_HITBOX_SIZE / 2,
                                                    PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE)):
@@ -223,6 +222,3 @@ class GameState:
             'win' : win_team,
         }
         return json.dumps(data)
-
-            
-        

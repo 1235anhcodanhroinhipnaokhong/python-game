@@ -23,7 +23,7 @@ class Player(pygame.sprite.Sprite):
         self.obtacles_sprites = obtacles_sprites
         self.sprite_index = 0
         self.rect = self.image.get_rect(topleft = spawn_pos)
-        self.hitbox = self.rect
+        self.hitbox = self.rect.inflate((-10,-10))
         self.team = team
         self.id = id
         self.hp = 100
