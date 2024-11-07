@@ -30,6 +30,7 @@ class OnlinePlayer(Player):
         self.angle = data['angle']
         self.leg.curr_sp_index = data['leg_index']
         self.leg.change_index(self.leg.curr_sp_index)
+        
         if self.dead != data['dead']:
             if data['dead'] == False:
                 Gun.sprite_groups.add(self.selected_weapon)

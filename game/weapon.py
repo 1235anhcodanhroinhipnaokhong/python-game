@@ -190,23 +190,17 @@ class Knife(Weapon):
 
 
 
-class Grenade(Weapon):
+class Grenade(Weapon):    
     def __init__(self, owner,sound_channel, name = "he"):
         super().__init__(owner,sound_channel, name, False)
-        self.explode_sound = pygame.mixer.Sound("./assets/sounds/weapons/explode1.wav")
         self.bullets_remain = 3
-        self.throw_speed = 10
         self.grenade_init()
         self.pos_buffer = 22
+        self.throw_time = 2.2
+        self.throw_time_cnt = self.throw_time
+        self.angle = 0
         self.onthrow = False
-        self.throw_hook = TimerCallback(2.2, self.finish_throw)
-        self.hitbox = self.rect.inflate((-25,-25))
-        # self.explode_img_sheet = pygame.image.load("./assets/gfx/explosion.png")
-        self.explode_img_sheet = pygame.transform.scale(pygame.image.load("./assets/gfx/explosion.png"),(640,640))
-        self.explode_img_index = 0
-        self.data_send = False
-        self.speed_x = 0
-        self.speed_y = 0
+    
     
     def grenade_init(self):
         if self.name == "he":
@@ -217,48 +211,63 @@ class Grenade(Weapon):
         if self not in self.sprite_groups:
             self.sprite_groups.add(self)
         self.onthrow = False
-        self.throw_hook.finished = False
-        self.throw_hook.time_cnt = 2.2
-        self.explode_img_index = 0
+        self.throw_time_cnt = self.throw_time
         
     def rotate(self, angle):
-        if not self.onthrow:
-            self.image = self.org_image
-            super().rotate(angle)
+        self.angle = angle
+        super().rotate(angle)
     
     def fire(self):
         self.onthrow = True
-        if self.throw_hook.finished and self.bullets_remain > 0:
+        if self.throw_time_cnt == self.throw_time and self.bullets_remain > 0:
+            ThrowGrenadeObject(self.owner, self.sprite_groups, self.angle, self.rect.center, self.obtacles)
             self.bullets_remain -= 1
-            self.speed_x = math.cos(self.angle * (2 * math.pi / 360)) * self.throw_speed
-            self.speed_y = math.sin(self.angle * (2 * math.pi / 360)) * self.throw_speed
     
     def finish_throw(self):        
         self.onthrow = False
         self.explode_img_index = 0
-        self.data_send = False
+        self.throw_time_cnt = self.throw_time
         if self.bullets_remain == 0:
             self.owner.switch_to_primary_weapon()
             self.sprite_groups.remove(self)
-        
+    
+
+                
     def update(self):
-        self.hitbox.center = self.rect.center
         if self.onthrow:
-            self.throw_hook.count_down(1/FPS)               
-            if abs(int(self.throw_hook.time_cnt * 100) - 60 * 2.5) <= 100 / FPS:
-                self.sound_channel.play(self.explode_sound)
-                            
-            if self.throw_hook.time_cnt >= 0.42 * 2.5:
-                self.rect.centerx += self.speed_x
-                self.rect.centery += self.speed_y
-            else:
-                if not self.data_send:
-                    self.data_send = True
-                    self.owner.explode_nade.append((self.rect.centerx, self.rect.centery, self.owner.id))
-                self.image = get_sprite_from_sheet(self.explode_img_sheet, 128, int(self.explode_img_index))
-                self.explode_img_index += 1/2.5
-            
-            for obtacle in sorted(self.obtacles, key = lambda x : distance(self.hitbox.center, x.rect.center)):
+            self.throw_time_cnt -= 1/FPS
+            if self.throw_time_cnt <= 0:
+                self.finish_throw()
+        
+
+class ThrowGrenadeObject(pygame.sprite.Sprite):
+    def __init__(self,owner, sprite_groups ,angle , pos, obtacles):
+        super().__init__(sprite_groups)
+        self.sprite_groups = sprite_groups
+        self.obtacles = obtacles
+        self.explode_sound = pygame.mixer.Sound("./assets/sounds/weapons/explode1.wav")
+        self.org_image = pygame.image.load(f"./assets/gfx/weapons/he.bmp").convert_alpha()
+        self.image = self.org_image
+        self.rect = self.image.get_rect(center = pos)
+        self.throw_speed = 10
+        self.throw_time_cnt = 2.2
+        self.hitbox = self.rect.inflate((-25,-25))
+        self.explode_img_sheet = pygame.transform.scale(pygame.image.load("./assets/gfx/explosion.png"),(640,640))
+        self.explode_img_index = 0
+        self.data_send = False
+        self.owner = owner
+        
+        self.speed_x = math.cos(angle * (2 * math.pi / 360)) * self.throw_speed
+        self.speed_y = math.sin(angle * (2 * math.pi / 360)) * self.throw_speed
+      
+    def finish_throw(self):        
+        self.explode_img_index = 0
+        self.data_send = False
+        self.sprite_groups.remove(self)
+        self.kill()
+    
+    def handle_collision(self):
+        for obtacle in sorted(self.obtacles, key = lambda x : distance(self.hitbox.center, x.rect.center)):
                 if obtacle.rect.colliderect(self.hitbox):
                     dx = self.hitbox.centerx - obtacle.rect.centerx
                     dy = self.hitbox.centery - obtacle.rect.centery
@@ -278,3 +287,24 @@ class Grenade(Weapon):
                                 self.speed_y = -self.speed_y
                     break
         
+    def update(self):
+        self.hitbox.center = self.rect.center
+        self.throw_time_cnt -= 1/FPS               
+        self.handle_collision()
+        if abs(int(self.throw_time_cnt * 100) - 60 * 2.5) <= 100 / FPS:
+            self.owner.sound_channel.play(self.explode_sound)
+                        
+        if self.throw_time_cnt >= 0.42 * 2.5:
+            self.rect.centerx += self.speed_x
+            self.rect.centery += self.speed_y
+        else:
+            if not self.data_send:
+                self.data_send = True
+                self.owner.explode_nade.append((self.rect.centerx, self.rect.centery, self.owner.id))
+            self.image = get_sprite_from_sheet(self.explode_img_sheet, 128, int(self.explode_img_index))
+            self.explode_img_index += 1/2.5
+            if self.explode_img_index > 24:
+                self.explode_img_index = 24
+            
+        if self.throw_time_cnt <= 0:
+            self.finish_throw()

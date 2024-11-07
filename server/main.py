@@ -7,7 +7,11 @@ from settings import *
 from gamestate import GameState
 
 # HOST = '192.168.1.27'
-HOST = '192.168.1.9'
+
+hostname = socket.gethostname()
+local_ip = socket.gethostbyname(hostname)
+
+HOST = local_ip
 PORT = 5555
 
 
@@ -32,13 +36,6 @@ class ProxyServer:
         self.servers.append([name, HOST, new_port, 0])
         print(f"Created new game server on port {new_port}")
         return (HOST, new_port)
-
-    def forward_to_server(self, data, addr, server):
-        try:
-            server.socket.sendto(data, (server.host, server.port))
-            print(f"Forwarded data from {addr} to server {server.port}")
-        except Exception as e:
-            print(f"Error forwarding data to server: {e}")
 
     def process_client_connection(self, data, addr):
         try:
@@ -77,6 +74,8 @@ class ProxyServer:
             print("Proxy server closed.")
 
 
+
+
 def addr_to_str(addr):
     host, port = addr
     return host + ":"+  str(port)
@@ -102,13 +101,12 @@ class Server:
                 player_id = self.unique_id[addr_to_str(addr)]
             
             
-            if client_data['flag'] == 1:
+            if client_data['flag'] == 1: ## create new player on server
                 if client_data['id'] in self.unique_id.values():
                     self.unique_id[addr_to_str(addr)] = client_data['id'] + "1"
                 else:
                     self.unique_id[addr_to_str(addr)] = client_data['id']
                 player_id = self.unique_id[addr_to_str(addr)]
-                
                 self.clients[addr] = player_id   
                 self.state.init_player(player_id, client_data['team'])
                 self.state.init_stat(player_id)
@@ -118,19 +116,18 @@ class Server:
                 self.socket.sendto(response, addr)
                 self.is_first_created = False
                 
-            elif client_data['flag'] == 2:
-                self.state.client_data_update(client_data)
-                response = self.state.get_current_state(client_data['id']).encode()
+            elif client_data['flag'] == 2: ## update client data to server gamestate and send the current gamestate back
+                self.state.client_data_update(client_data, player_id)
+                response = self.state.get_current_state().encode()
                 self.socket.sendto(response, addr) 
                 
-            elif client_data['flag'] == 3:
-                # Handle player respawn
-                self.state.respawn_player(player_id)
+            # elif client_data['flag'] == 3: ## 
+            #     self.state.respawn_player(player_id)
                 
-            elif client_data['flag'] == 4:
+            elif client_data['flag'] == 4: ## change client team
                 self.state.change_team(player_id, client_data['team'])
                 
-            elif client_data['flag'] == -1:
+            elif client_data['flag'] == -1: ## announce to server before a client disconnect
                 self.state.send_message(f"{player_id} had disconnected")
                 self.state.players.pop(self.clients[addr])
                 self.clients.pop(addr)
@@ -150,7 +147,6 @@ class Server:
                 if addr not in self.clients:
                     print(f"New connection from {addr}")
                 self.process_client_data(data, addr)
-                
             for server in servers_list:
                 if server[2] == self.port:
                     servers_list.remove(server)                

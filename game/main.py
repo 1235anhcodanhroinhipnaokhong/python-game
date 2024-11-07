@@ -5,7 +5,7 @@ from game.gameclient import GameClient
 from game.ui.button import Button
 from game.ui.select_menu import SelectMenu
 from game.ui.pause_menu import PauseMenu
-from game.network import Network
+from game.network import Network, HOST
 from game.intro import Intro
 from game.start_menu import StartMenu
 
@@ -114,7 +114,7 @@ class Game:
         while True:
             self.main_menu()
             (host, port) = self.start_menu.addr
-            self.network.join_server(host, port)
+            self.network.join_server(HOST, port)
             self.start_game()
     
     def start_game(self):
@@ -134,7 +134,7 @@ class Game:
 
                 if event.type == MOUSEBUTTONDOWN and self.pause_menu.active:
                     if self.pause_menu.disconnect_rect.collidepoint(mouse_pos):
-                        self.network.disconect_to_current_server(self.game_client.local_player.id)
+                        self.network.disconect_to_current_server()
                         del self.game_client
                         self.game_client = None
                         self.pause_menu.toggle()
@@ -144,9 +144,12 @@ class Game:
                         
                     if self.pause_menu.cancel_rect.collidepoint(mouse_pos):
                         self.pause_menu.toggle()
+            
                         
             if disconnected:
-                return            
+                return           
+            
+             
             if self.select_menu.val not in ["", "t", "ct"]:
                 if not self.game_client:
                     self.game_client = GameClient(self.start_menu.default_name, self.select_menu.val, self.network)
@@ -154,6 +157,8 @@ class Game:
                     self.network.change_team_request(self.game_client.local_player.id, self.select_menu.val)    
                     self.game_client.local_player.switch_team(self.select_menu.val)
                 self.select_menu.val = ""
+            
+            
                     
             if self.game_client:
                 self.screen.fill((255,255,255))

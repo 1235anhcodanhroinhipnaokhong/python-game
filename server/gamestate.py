@@ -64,6 +64,7 @@ class GameState:
             'KDR':0,
             'sc': 0,
         }
+        
     
     def respawn_player(self, player_id):
         self.players[player_id]['dead'] = True
@@ -103,12 +104,14 @@ class GameState:
         self.players_stat[killer_id]['k'] += 1
         self.players_stat[killer_id]['sc'] += 10
         self.players_stat[killer_id]['KDR'] = self.players_stat[killer_id]['k'] / self.players_stat[killer_id]['d'] if self.players_stat[killer_id]['d'] != 0 else self.players_stat[killer_id]['k']
+        self.players_stat[killer_id]['KDR'] = round(self.players_stat[killer_id]['KDR'], 2)
         
         self.players_stat[dead_id]['d'] += 1
+        self.players_stat[dead_id]['KDR'] = round(self.players_stat[dead_id]['KDR'], 2)
         self.players_stat[dead_id]['KDR'] = self.players_stat[dead_id]['k'] / self.players_stat[dead_id]['d'] if self.players_stat[dead_id]['d'] != 0 else self.players_stat[dead_id]['k']
-        
         self.players[dead_id]['dead'] = True
         self.send_message(f"{killer_id} had killed {dead_id}");
+        
         self.respawn_player(dead_id)
     
     def send_message(self, msg):
@@ -172,13 +175,13 @@ class GameState:
                         break
         self.nades.clear()
                         
-    def client_data_update(self, client_data):
+    def client_data_update(self, client_data, player_id):
             
         for key in client_data['player'].keys():
             if client_data['player']['dead'] == True and key == 'pos':
                 continue
             if key not in self.invalid_update_keys:
-                self.players[client_data['id']][key] = client_data['player'][key]
+                self.players[player_id][key] = client_data['player'][key]
                 
         for bullet in client_data['player']['bullets']:
             self.bullets.append(bullet)
@@ -198,7 +201,7 @@ class GameState:
             self.nade_handle()
                 
     
-    def get_current_state(self, player_id):
+    def get_current_state(self):
         remaining_time = self.end_time - time.time()
         if remaining_time <= 0:
             curr_time = "00:00"

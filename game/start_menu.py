@@ -48,7 +48,7 @@ class StartMenu:
             
             
     def draw(self):
-        self.display_surface.blit(self.bg_image)
+        self.display_surface.blit(self.bg_image, (0,0))
         for name, rect in self.buttons:
             color = (200, 200, 200) if rect.collidepoint(pygame.mouse.get_pos()) else (100, 100, 100)
             pygame.draw.rect(self.display_surface, color, rect)

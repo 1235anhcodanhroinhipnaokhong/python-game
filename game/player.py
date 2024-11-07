@@ -4,7 +4,7 @@ import os
 import json
 from game.settings import *
 from game.ultis.resource_loader import *
-from game.weapon import Gun, Knife, Grenade
+from game.weapon import *
 from game.ultis.func import TimerCallback
 from game.leg import Leg
 
@@ -191,11 +191,6 @@ class Player(pygame.sprite.Sprite):
         if self.selected_weapon:
             self.selected_weapon.rotate(-self.angle)
         self.leg.rotate(-self.angle)           
-        
-    
-    def display(self, surf, offset):
-        offset_pos = self.hitbox.center - offset    
-        surf.blit(self.image, offset_pos)    
     
     def knife_slash_animation(self): 
         if self.slash_time_cnt >= self.slash_time / 2:
@@ -216,7 +211,7 @@ class Player(pygame.sprite.Sprite):
                 self.image = self.org_image
                 self.rect = self.image.get_rect()
                 self.rect.center = self.hitbox.center
-                Gun.sprite_groups.remove(self.selected_weapon)
+                Weapon.sprite_groups.remove(self.selected_weapon)
                 Leg.sprite_group.remove(self.leg)
                 self.sprite_index = -1
                                 
@@ -226,7 +221,6 @@ class Player(pygame.sprite.Sprite):
                         weapon.reset()
                 self.hitbox.center = data['pos']
                 Leg.sprite_group.add(self.leg)
-                Gun.sprite_groups.add(self.selected_weapon)
                 self.switch_to_primary_weapon()
                 self.rect = self.image.get_rect()
                 self.rect.center = self.hitbox.center
@@ -258,7 +252,6 @@ class Player(pygame.sprite.Sprite):
             'nade': self.explode_nade,
             'firing': self.firing,
             'dead': self.dead
-            
         }
         return data
         
