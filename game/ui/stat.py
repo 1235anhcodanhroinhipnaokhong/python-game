@@ -14,8 +14,7 @@ class StatsMenu:
         self.ROW_COLOR_2 = (40, 40, 40)
         self.FONT = pygame.font.SysFont('Arial', 24)
         
-        self.hidden = True
-        
+        self.hidden = True     
 
     def update_players_stat(self, players_stat):
         self.players_stat = players_stat

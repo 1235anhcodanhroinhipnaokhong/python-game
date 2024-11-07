@@ -3,9 +3,8 @@ import math
 import os
 import json
 from game.settings import *
-from game.ultis.resource_loader import *
+from game.utils.resource_loader import *
 from game.weapon import *
-from game.ultis.func import TimerCallback
 from game.leg import Leg
 
 class Player(pygame.sprite.Sprite):
@@ -66,6 +65,12 @@ class Player(pygame.sprite.Sprite):
         self.selected_weapon = self.weapons_list[1]
         self.selected_weapon_index = 1
         
+    def set_selected_weapon(self, weapon):
+        if weapon != self.selected_weapon:
+            Gun.sprite_groups.remove(self.selected_weapon)
+            Gun.sprite_groups.add(weapon)
+            self.selected_weapon = weapon      
+            
     def sound_channel_init(self, sound_channel):
         self.sound_channel = sound_channel
     
@@ -77,17 +82,9 @@ class Player(pygame.sprite.Sprite):
         self.sprites_sheet = pygame.image.load(f"./assets/gfx/player/{team}.bmp").convert_alpha() 
         self.org_image = get_sprite_from_sheet(self.sprites_sheet, PLAYER_SIZE, 0)
         self.weapons_init() 
-        
-    
+
     def set_volume(self, volume):
         self.sound_channel.set_volume(volume)
-    
-    def set_selected_weapon(self, weapon):
-        if weapon != self.selected_weapon:
-            Gun.sprite_groups.remove(self.selected_weapon)
-            Gun.sprite_groups.add(weapon)
-            self.selected_weapon = weapon
-        
     
     def handle_key_input(self):
         keys = pygame.key.get_pressed()
@@ -175,8 +172,7 @@ class Player(pygame.sprite.Sprite):
         self.hitbox.y += self.direction.y * self.speed   
         self.handle_collision('vertical')
         self.rect.center = self.hitbox.center
-        
-    
+            
     def handle_angle(self):
         if not self.onslash:
             offset_x = pygame.mouse.get_pos()[0] - CENTER_X

@@ -3,8 +3,8 @@ import math
 from game.bullet import LineBullet
 from game.settings import *
 import random
-from game.ultis.func  import TimerCallback, distance
-from game.ultis.resource_loader import get_sprite_from_sheet
+from game.utils.func  import distance
+from game.utils.resource_loader import get_sprite_from_sheet
 
 class Weapon(pygame.sprite.Sprite):
     sprite_groups = None

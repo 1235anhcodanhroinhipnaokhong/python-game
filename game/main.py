@@ -23,13 +23,13 @@ class Game:
         self.select_menu = SelectMenu()
         self.network = Network()
         self.pause_menu = PauseMenu()
+        self.start_menu = StartMenu()
         
         
         
     
     def main_menu(self):
         self.main_menu_running = True  
-        self.start_menu = StartMenu()
         def create_done():
             new_server_name = self.start_menu.server_name_input.text
             self.start_menu.server_name_input.text = ""

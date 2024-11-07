@@ -25,8 +25,7 @@ class PauseMenu:
 
     def draw(self):
         if self.active:
-            self.draw_menu()
-        
+            self.draw_menu()       
 
     def draw_menu(self):                    
             mouse_pos = pygame.mouse.get_pos()

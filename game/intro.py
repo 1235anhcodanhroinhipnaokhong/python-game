@@ -84,6 +84,7 @@ class Intro:
         self.intro_menu_active = True
 
     def draw(self):
+        
         if self.intro_menu_active :
             cur = pygame.time.get_ticks() / 1000
             if cur - self.last_blink_time >= self.blink_interval:

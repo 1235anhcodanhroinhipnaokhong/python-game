@@ -16,17 +16,14 @@ class MessageBar:
         self.msg_list = []
         self.msg_components = []
         self.display_surf = pygame.display.get_surface()
-    
-                
-                
+   
     def add_message(self, msg):
         self.msg_list.append(msg)
         len = self.msg_list.__len__()
         self.msg_components.append(
             Label(msg, (self.width/2, self.msg_height * len), (255,255,255), True)
         )
-        
-    
+
     def pop_message(self):
         self.msg_list.pop(0)
         self.msg_components.pop(0)

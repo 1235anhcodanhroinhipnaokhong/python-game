@@ -1,7 +1,7 @@
 import pygame
 from game.player import Player
 from game.settings import *
-from game.ultis.resource_loader import get_sprite_from_sheet
+from game.utils.resource_loader import get_sprite_from_sheet
 from game.weapon import Gun
 from game.leg import Leg
 from game.leg import Leg

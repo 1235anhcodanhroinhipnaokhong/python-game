@@ -1,5 +1,5 @@
 import pygame, math
-from game.ultis.resource_loader import *
+from game.utils.resource_loader import *
 from game.settings import *
 class Leg(pygame.sprite.Sprite):
     sprite_group = None

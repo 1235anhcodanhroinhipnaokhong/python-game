@@ -20,8 +20,7 @@ class SelectMenu:
         self.buttons = self.create_main_buttons()
         self.done = False
         self.val = ""
-        
-
+    
     def create_main_buttons(self):
         main_buttons = {
             "Terrorists": pygame.Rect(0, 0, 300, 50),
@@ -120,3 +119,4 @@ class SelectMenu:
                             num = random.randrange(1,4)
                         self.val += str(num)
                         self.toggle()
+                        

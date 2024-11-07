@@ -32,6 +32,7 @@ class MsgPopup:
                 self.ctwin_sound.play()
             timer = threading.Timer(3, self.clear)
             timer.start()
+            
     def display(self):
         if self.msg != "":
             self.surf.fill(self.bg_color)

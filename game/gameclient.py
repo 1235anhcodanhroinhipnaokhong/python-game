@@ -1,13 +1,13 @@
 import pygame, random
 from game.bullet import LineBullet
-from game.ultis.resource_loader import import_csv_layout, get_animation_from_img
+from game.utils.resource_loader import import_csv_layout, get_animation_from_img
 from game.settings import *
 from game.player import Player
 from game.online_player import OnlinePlayer
 from game.tile import Tile
 from game.weapon import Gun, Grenade, Weapon
 from game.leg import Leg
-from game.ultis.func import distance
+from game.utils.func import distance
 from game.ui.message_bar import MessageBar
 from game.ui.stat import StatsMenu
 from game.ui.msg_popup import MsgPopup
@@ -93,8 +93,7 @@ class GameClient:
             if location_diff > 2000:
                 player.set_volume(0)
                 continue
-            player.set_volume(1 - (location_diff / 2000))
-            
+            player.set_volume(1 - (location_diff / 2000))  
     
     def network_update(self):
         self.network.local_data = {
@@ -136,10 +135,7 @@ class GameClient:
             self.win_popup.update("Terrorists Win")
         if self.network.server_data['win'] == "ct":
             self.win_popup.update("Counter-Terrorists Win")
-            
-            
-                 
-                     
+                             
     def run(self):
         self.volume_control()
         self.visible_sprites.update()
@@ -155,6 +151,7 @@ class GameClient:
         self.online_player.empty() 
         del self.msg_bar
         del self.stats_menu
+    
     def __del__(self):
         self.cleanup()            
         

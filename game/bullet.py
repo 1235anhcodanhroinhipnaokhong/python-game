@@ -1,7 +1,7 @@
 import pygame
 from game.settings import *
 import math
-from game.ultis.func import *
+from game.utils.func import *
 from game.tile import Tile
 
 class Bullet(pygame.sprite.Sprite):
@@ -22,7 +22,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.centery += int(self.y_vel)
         self.hitbox.center = self.rect.center
         
-    def collition(self, sprites_groups):
+    def collision(self, sprites_groups):
         for sprite in sprites_groups:
             if self.hitbox.colliderect(sprite.rect):
                 self.kill()
@@ -52,6 +52,7 @@ class LineBullet():
     
     @classmethod
     def init_hit_obtacles(cls, obtacles_groups, players_groups):
+        
         cls.obtacles = obtacles_groups
         cls.players  = players_groups
     def to_object_value(self):
